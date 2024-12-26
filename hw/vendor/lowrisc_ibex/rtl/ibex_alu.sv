@@ -20,6 +20,12 @@ module ibex_alu #(
 
   input  logic              multdiv_sel_i,
 
+//BLOC
+  input  logic 		    bloc_op_i,
+  input  logic [31:0] 	    bloc_mask_i,
+  input  logic [31:0] 	    bloc_set_i,
+  output logic [31:0] 	    bloc_result_o,
+
   input  logic [31:0]       imd_val_q_i[2],
   output logic [31:0]       imd_val_d_o[2],
   output logic [1:0]        imd_val_we_o,
@@ -140,6 +146,13 @@ module ibex_alu #(
       is_greater_equal = operand_a_i[31] ^ (cmp_signed);
     end
   end
+
+  always_comb begin
+	if (bloc_op_i) begin
+       	bloc_result_o = (operand_a_i & ~bloc_mask_i) | (bloc_set_i & bloc_mask_i);
+     end
+  end
+
 
   // GTE unsigned:
   // (a[31] == 1 && b[31] == 1) => adder_result[31] == 0
@@ -353,7 +366,38 @@ module ibex_alu #(
     shift_result = shift_left ? shift_result_rev : shift_result;
 
   end
+  
 
+/*  logic        [31:0] bloc_interim_result;
+  logic        illegal_intruction;
+  always_comb begin
+        unique case (operator_i)
+        ALU_BLOC:
+
+        for ( int unsigned i=0; i<8; i++ ) begin
+          if (operand_b_i[i+8]==0) begin
+                bloc_interim_result[i]=operand_a_i[i]
+          end
+          else begin
+                if (operand_b_i[i]==1 && operand_a_i[i]==0) begin
+                  //  operand_a_i[i]==1;
+                    bloc_interim_result[i]==1;
+                end
+                else if (operand_b_i[i]==1 && operand_a_i[i]==1) begin
+                    bloc_interim_result==32'b1;
+                end
+                else if (operand_b_i[i]==0 && operand_a_i[i]==1) begin
+                  //  operand_a_i[i]==0;
+                    bloc_interim_result[i]==0;
+                end
+                else if (operand_b_i[i]==0 && operand_a_i[i]==0) begin
+                    bloc_interim_result==32'b1;
+                end
+          end
+        assign bloc_result= bloc_interim_result;
+  end
+
+  */
   ///////////////////
   // Bitwise Logic //
   ///////////////////
@@ -1339,6 +1383,9 @@ module ibex_alu #(
 
       // Shuffle Operations (RV32B)
       ALU_SHFL, ALU_UNSHFL: result_o = shuffle_result;
+
+      //BLOC
+      //ALU_BLOC: result_o = bloc_result;
 
       // Crossbar Permutation Operations (RV32B)
       ALU_XPERM_N, ALU_XPERM_B, ALU_XPERM_H: result_o = xperm_result;

@@ -34,6 +34,12 @@ module ibex_load_store_unit #(
   output logic [MemDataWidth-1:0] data_wdata_o,
   input  logic [MemDataWidth-1:0] data_rdata_i,
 
+  // BLOC
+  input  logic        bloc_op_i,
+  input  logic [31:0] bloc_mask_i,
+  input  logic [31:0] bloc_set_i,
+  output logic        bloc_err_o,
+
   // signals to/from ID/EX stage
   input  logic         lsu_we_i,             // write enable                     -> from ID/EX
   input  logic [1:0]   lsu_type_i,           // data type: word, half word, byte -> from ID/EX
@@ -103,7 +109,7 @@ module ibex_load_store_unit #(
 
   typedef enum logic [2:0]  {
     IDLE, WAIT_GNT_MIS, WAIT_RVALID_MIS, WAIT_GNT,
-    WAIT_RVALID_MIS_GNTS_DONE
+    WAIT_RVALID_MIS_GNTS_DONE, BLOC_OP
   } ls_fsm_e;
 
   ls_fsm_e ls_fsm_cs, ls_fsm_ns;
@@ -475,8 +481,16 @@ module ibex_load_store_unit #(
           rdata_update = ~data_we_q;
           // Wait for second rvalid
           ls_fsm_ns = IDLE;
+
         end
       end
+
+      BLOC_OP: begin
+       data_req_o = 1'b1;
+       if (data_gnt_i) begin
+         ls_fsm_ns = IDLE;
+       end
+     end
 
       default: begin
         ls_fsm_ns = IDLE;
@@ -485,6 +499,11 @@ module ibex_load_store_unit #(
   end
 
   assign lsu_req_done_o = (lsu_req_i | (ls_fsm_cs != IDLE)) & (ls_fsm_ns == IDLE);
+
+//BLOC
+  logic [31:0] bloc_data, bloc_result;
+  assign bloc_data = data_rdata_i[31:0];
+  assign bloc_result = (bloc_data & ~bloc_mask_i) | (bloc_set_i & bloc_mask_i);
 
   // registers for FSM
   always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -532,7 +551,7 @@ module ibex_load_store_unit #(
       .data_o (data_wdata_o)
     );
   end else begin : g_no_mem_wdata_ecc
-    assign data_wdata_o = data_wdata;
+    assign data_wdata_o =  bloc_op_i ? bloc_result : data_wdata; //BLOC
   end
 
   // output to ID stage: mtval + AGU for misaligned transactions
@@ -580,6 +599,8 @@ module ibex_load_store_unit #(
   assign fcov_mis_bus_err_1_d = fcov_mis_rvalid_2                   ? 1'b0                 : // clr
                                 fcov_mis_rvalid_1 && data_bus_err_i ? 1'b1                 : // set
                                                                       fcov_mis_bus_err_1_q ;
+								 				
+  assign bloc_err_o = bloc_op_i && data_bus_err_i && (ls_fsm_cs == BLOC_OP);
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin

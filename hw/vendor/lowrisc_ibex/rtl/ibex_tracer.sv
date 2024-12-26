@@ -915,7 +915,9 @@ module ibex_tracer (
         // LOAD & STORE
         INSN_LOAD:       decode_load_insn();
         INSN_STORE:      decode_store_insn();
-        // MISC-MEM
+        // BLOC
+        INSN_BLOC:       decode_r_insn("bloc"); 
+	// MISC-MEM
         INSN_FENCE:      decode_fence();
         INSN_FENCEI:     decode_mnemonic("fence.i");
         // RV32B - ZBA

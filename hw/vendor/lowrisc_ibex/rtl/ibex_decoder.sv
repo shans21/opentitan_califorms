@@ -91,6 +91,10 @@ module ibex_decoder #(
                                                       // word or word
   output logic                 data_sign_extension_o, // sign extension for data read from
                                                       // memory
+  //BLOC
+  output logic        bloc_insn_o,
+  output logic [31:0] bloc_mask_o,
+  output logic [31:0] bloc_set_o,
 
   // jump/branches
   output logic                 jump_in_dec_o,         // jump is being calculated in ALU
@@ -113,6 +117,10 @@ module ibex_decoder #(
   logic [4:0] instr_rs3;
   logic [4:0] instr_rd;
 
+  //output logic        bloc_insn_o,
+  //output logic [30:0] bloc_mask_o,
+  //output logic [30:0] bloc_set_o,
+  
   logic        use_rs3_d;
   logic        use_rs3_q;
 
@@ -335,6 +343,16 @@ module ibex_decoder #(
         endcase
       end
 
+      //////////
+      ///BLOC///
+      //////////
+
+      OPCODE_BLOC: begin
+        rf_ren_a_o         = 1'b1;
+        rf_ren_b_o         = 1'b1;
+        rf_we              = 1'b1;
+      end
+
       /////////
       // ALU //
       /////////
@@ -445,6 +463,16 @@ module ibex_decoder #(
           default: illegal_insn = 1'b1;
         endcase
       end
+
+      OPCODE_BLOC: begin
+        bloc_insn_o = 1'b1;
+        bloc_mask_o = instr_rdata_i[31:20];
+        bloc_set_o  = {instr_rdata_i[19:12], instr_rdata_i[11:7]};        
+	alu_op_a_mux_sel_o = OP_A_REG_A;
+        alu_op_b_mux_sel_o = OP_B_REG_B;
+        alu_operator_o     = ALU_BLOC;
+        alu_multicycle_o = 1'b1;
+     end
 
       OPCODE_OP: begin  // Register-Register ALU operation
         rf_ren_a_o      = 1'b1;

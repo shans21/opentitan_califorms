@@ -149,6 +149,13 @@ module ibex_id_stage #(
   input  logic                      debug_ebreaku_i,
   input  logic                      trigger_match_i,
 
+
+  //BLOC
+  output logic        bloc_insn,
+  output logic [31:0] bloc_mask_o,
+  output logic [31:0] bloc_set_o,
+  output logic        bloc_exec_o,
+
   // Write back signal
   input  logic [31:0]               result_ex_i,
   input  logic [31:0]               csr_rdata_i,
@@ -498,6 +505,11 @@ module ibex_id_stage #(
     .csr_access_o(csr_access_o),
     .csr_op_o    (csr_op_o),
 
+    //BLOC
+    .bloc_insn_o      (bloc_insn),
+    .bloc_mask_o      (bloc_mask_o),
+    .bloc_set_o       (bloc_set_o),
+
     // LSU
     .data_req_o           (lsu_req_dec),
     .data_we_o            (lsu_we),
@@ -606,6 +618,10 @@ module ibex_id_stage #(
     .store_err_i        (lsu_store_err_i),
     .wb_exception_o     (wb_exception),
     .id_exception_o     (id_exception),
+
+    //BLOC
+    .bloc_insn_i      (bloc_insn),
+    .bloc_exec_o      (bloc_exec_o),
 
     // jump/branch control
     .branch_set_i     (branch_set),

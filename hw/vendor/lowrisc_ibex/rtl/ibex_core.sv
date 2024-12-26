@@ -225,6 +225,14 @@ module ibex_core import ibex_pkg::*; #(
   logic        expecting_load_resp_id;
   logic        expecting_store_resp_id;
 
+  // BLOC
+  logic        bloc_insn;
+  logic [31:0] bloc_mask;
+  logic [31:0] bloc_set;
+  logic [31:0] bloc_result;
+  logic        bloc_err;
+  logic        bloc_exec;
+
   // LSU signals
   logic        lsu_addr_incr_req;
   logic [31:0] lsu_addr_last;
@@ -631,6 +639,12 @@ module ibex_core import ibex_pkg::*; #(
     .illegal_csr_insn_i   (illegal_csr_insn_id),
     .data_ind_timing_i    (data_ind_timing),
 
+    //BLOC
+    .bloc_insn        (bloc_insn),
+    .bloc_mask_o      (bloc_mask),
+    .bloc_set_o       (bloc_set),
+    .bloc_exec_o      (bloc_exec),
+
     // LSU
     .lsu_req_o     (lsu_req),  // to load store unit
     .lsu_we_o      (lsu_we),  // to load store unit
@@ -743,6 +757,13 @@ module ibex_core import ibex_pkg::*; #(
     .imd_val_d_o (imd_val_d_ex),
     .imd_val_q_i (imd_val_q_ex),
 
+
+    //BLOC
+     .bloc_op_i        (bloc_insn),
+     .bloc_mask_i      (bloc_mask),
+     .bloc_set_i       (bloc_set),
+     .bloc_result_o    (bloc_result),
+
     // Outputs
     .alu_adder_result_ex_o(alu_adder_result_ex),  // to LSU
     .result_ex_o          (result_ex),  // to ID
@@ -798,6 +819,12 @@ module ibex_core import ibex_pkg::*; #(
 
 
     .lsu_resp_valid_o(lsu_resp_valid),
+
+    //BLOC
+    .bloc_op_i        (bloc_insn),
+    .bloc_mask_i      (bloc_mask),
+    .bloc_set_i       (bloc_set),
+    .bloc_err_o       (bloc_err),
 
     // exception signals
     .load_err_o           (lsu_load_err_raw),

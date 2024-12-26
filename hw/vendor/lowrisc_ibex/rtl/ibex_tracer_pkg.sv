@@ -296,6 +296,9 @@ package ibex_tracer_pkg;
   parameter logic [31:0] INSN_LOAD    = {25'h?,                            {OPCODE_LOAD } };
   parameter logic [31:0] INSN_STORE   = {25'h?,                            {OPCODE_STORE} };
 
+  //BLOC
+  parameter logic [31:0] INSN_BLOC   = {7'b0000000, 10'h?, 3'b000, 5'h?,   {OPCODE_BLOC}  };
+
   // MISC-MEM
   parameter logic [31:0] INSN_FENCE   = { 17'h?,             3'b000, 5'h?, {OPCODE_MISC_MEM} };
   parameter logic [31:0] INSN_FENCEI  = { 17'h0,             3'b001, 5'h0, {OPCODE_MISC_MEM} };

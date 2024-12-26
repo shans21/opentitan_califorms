@@ -22,6 +22,12 @@ module ibex_ex_block #(
   input  logic [31:0]           alu_operand_b_i,
   input  logic                  alu_instr_first_cycle_i,
 
+  //BLOC
+  input  logic        bloc_op_i,
+  input  logic [31:0] bloc_mask_i,
+  input  logic [31:0] bloc_set_i,
+  output logic [31:0] bloc_result_o,
+
   // Branch Target ALU
   // All of these signals are unusued when BranchTargetALU == 0
   input  logic [31:0]           bt_a_operand_i,
@@ -128,6 +134,10 @@ module ibex_ex_block #(
     .multdiv_sel_i      (multdiv_sel),
     .adder_result_o     (alu_adder_result_ex_o),
     .adder_result_ext_o (alu_adder_result_ext),
+    .bloc_op_i    (bloc_op_i), //BLOC
+    .bloc_mask_i  (bloc_mask_i),
+    .bloc_set_i   (bloc_set_i),
+    .bloc_result_o(bloc_result_o),
     .result_o           (alu_result),
     .comparison_result_o(alu_cmp_result),
     .is_equal_result_o  (alu_is_equal_result)

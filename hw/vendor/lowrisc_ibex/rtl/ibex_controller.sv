@@ -65,6 +65,10 @@ module ibex_controller #(
   output logic                  wb_exception_o,          // Instruction in WB taking an exception
   output logic                  id_exception_o,          // Instruction in ID taking an exception
 
+  //BLOC
+  input  logic		        bloc_insn_i,
+  output logic       		bloc_exec_o,
+
   // jump/branch signals
   input  logic                  branch_set_i,            // branch set signal (branch definitely
                                                          // taken)
@@ -300,7 +304,7 @@ module ibex_controller #(
                       store_err_prio,
                       load_err_prio}),
              (ctrl_fsm_cs == FLUSH) & exc_req_q)
-
+	     
   ////////////////
   // Interrupts //
   ////////////////
@@ -564,6 +568,11 @@ module ibex_controller #(
         // 1. currently running (multicycle) instructions and exceptions caused by these
         // 2. debug requests
         // 3. interrupt requests
+
+	if (bloc_insn_i) begin
+        	bloc_exec_o = 1'b1;
+        	ctrl_fsm_ns = FLUSH;
+        end
 
         controller_run_o = 1'b1;
 
